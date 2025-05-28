@@ -1,0 +1,288 @@
+/* General Body Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2A005D, #4F0080, #8A2BE2); /* Deep Purple to Violet gradient */
+    color: #E0E0E0; /* Light text for contrast */
+    overflow: hidden; /* Hide scrollbars if content doesn't fit exactly */
+}
+
+/* Main Container for the Chatbot */
+.container {
+    background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white for a frosted glass effect */
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Ensures rounded corners are respected */
+    position: relative; /* For the subtle background animation */
+    padding: 20px; /* Add padding inside the container */
+}
+
+/* Subtle Background Animation (Tech Feel) */
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255,0,255,0.1) 0%, rgba(0,255,255,0.1) 100%);
+    mix-blend-mode: overlay;
+    animation: pulse 10s infinite alternate;
+    border-radius: 20px; /* Match container border-radius */
+    z-index: -1; /* Place behind content */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.05); opacity: 0.6; }
+}
+
+/* Header Styles */
+h1 {
+    text-align: center;
+    color: #FFD700; /* Gold-like color for emphasis */
+    margin-bottom: 5px;
+    font-size: 2.2em; /* Slightly larger title */
+    font-weight: 600; /* More prominent */
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); /* Soft glow */
+}
+
+.tagline {
+    text-align: center;
+    color: #FF69B4; /* Pink */
+    font-size: 1.1em;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Chatbox for Messages */
+.chat-box {
+    background-color: rgba(255, 255, 255, 0.08); /* More subtle background */
+    border-radius: 15px;
+    padding: 15px;
+    height: 450px; /* Make it a bit taller */
+    overflow-y: auto; /* Scroll only if needed */
+    margin-bottom: 15px;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2); /* Inner shadow for depth */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between messages */
+}
+
+/* Individual Message Styles */
+.message {
+    padding: 10px 15px;
+    border-radius: 12px;
+    max-width: 75%;
+    word-wrap: break-word; /* Prevents long words from breaking layout */
+    line-height: 1.5;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative; /* For the subtle tech pattern */
+}
+
+.message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 10px 10px;
+    opacity: 0.1;
+    z-index: -1;
+    border-radius: 12px;
+}
+
+
+.user-msg {
+    background: linear-gradient(45deg, #6A5ACD, #483D8B); /* Slate Blue to Dark Slate Blue */
+    align-self: flex-end; /* Align to the right */
+    color: #E0E0E0;
+}
+
+.bot-msg {
+    background: linear-gradient(45deg, #00BFFF, #1E90FF); /* Deep Sky Blue to Dodger Blue */
+    align-self: flex-start; /* Align to the left */
+    color: #E0E0E0;
+}
+
+
+/* Styling for Gemini's formatted text within message bubbles */
+.bot-msg p {
+    margin-bottom: 0.8em; /* Space between paragraphs */
+    line-height: 1.6;
+}
+
+.bot-msg p:last-child {
+    margin-bottom: 0; /* No margin after the last paragraph */
+}
+
+.bot-msg ul, .bot-msg ol {
+    margin: 0.8em 0; /* Space above/below lists */
+    padding-left: 20px; /* Indent for bullet points/numbers */
+}
+
+.bot-msg li {
+    margin-bottom: 0.4em; /* Space between list items */
+    line-height: 1.4;
+}
+
+.bot-msg strong {
+    color: #FFD700; /* Use a bright color for bold keywords, like gold */
+    font-weight: 600; /* Ensure they are visibly bold */
+}
+
+.bot-msg em { /* For italics */
+    color: #FF69B4; /* Use pink for italics */
+    font-style: normal; /* Sometimes Markdown converts *italics* to <em>, ensure visible */
+    font-weight: 400;
+}
+
+/* Adjusting message box for content that might push its boundaries */
+.message {
+    padding: 10px 15px;
+    border-radius: 12px;
+    max-width: 85%; /* Give it a little more room for content */
+    word-wrap: break-word;
+    line-height: 1.5;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    /* Ensure inner content like lists don't overflow */
+    box-sizing: border-box; /* Include padding/border in element's total width/height */
+}
+
+/* Input Form and Elements */
+.input-area {
+    display: flex;
+    gap: 10px; /* Space between input and button */
+}
+
+input[type="text"],
+textarea { /* Apply styles to both input type text and textarea */
+    flex-grow: 1;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 25px;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #E0E0E0;
+    font-size: 1em;
+    outline: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    resize: none; /* Prevent manual resizing by user */
+    overflow-y: hidden; /* Hide scrollbar but allow content to expand */
+    min-height: 50px; /* Set a minimum height for the textarea */
+}
+
+input[type="text"]::placeholder,
+textarea::placeholder { /* Apply placeholder styles to both */
+    color: #B0B0B0;
+    opacity: 0.8;
+}
+
+input[type="text"]:focus,
+textarea:focus { /* Apply focus styles to both */
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+}
+
+input[type="text"]::placeholder {
+    color: #B0B0B0; /* Lighter placeholder text */
+    opacity: 0.8;
+}
+
+input[type="text"]:focus {
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.6); /* Purple glow on focus */
+}
+
+input[type="submit"] {
+    padding: 12px 25px;
+    background: linear-gradient(45deg, #FF6347, #FF4500); /* Tomato to OrangeRed gradient */
+    color: white;
+    border: none;
+    border-radius: 25px; /* More rounded */
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 5px 15px rgba(255, 99, 71, 0.4); /* Soft shadow */
+}
+
+input[type="submit"]:hover {
+    transform: translateY(-2px); /* Slight lift effect */
+    box-shadow: 0 8px 20px rgba(255, 99, 71, 0.6); /* More prominent shadow on hover */
+}
+
+#clearChatBtn {
+    padding: 12px 25px;
+    background: linear-gradient(45deg, #FF69B4, #E0BBE4); /* Pink to light purple gradient */
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+    margin-left: 10px; /* Space it from the Send button */
+}
+
+#clearChatBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 105, 180, 0.6);
+}
+
+/* Scrollbar Styling (for Chrome/Edge/Safari) */
+.chat-box::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-box::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+.chat-box::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #8A2BE2, #FF69B4); /* Purple to Pink gradient */
+    border-radius: 10px;
+}
+.chat-box::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #9932CC, #FF1493);
+}
+
+.loading-indicator {
+    text-align: center;
+    font-size: 2em;
+    color: #FFD700; /* Gold color */
+    margin-top: 15px;
+    display: none; /* Hidden by default, shown by JS */
+    animation: pulseFade 1.5s infinite alternate; /* Simple pulse animation */
+}
+
+@keyframes pulseFade {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Responsive Design for smaller screens */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        margin: 10px;
+    }
+    h1 {
+        font-size: 1.8em;
+    }
+    .tagline {
+        font-size: 1em;
+    }
+}
