@@ -5,7 +5,7 @@ import os
 # This is where you'll put your secret Gemini key!
 # It's like telling our robot its secret password.
 # Replace 'YOUR_GEMINI_API_KEY' with the key you saved earlier.
-genai.configure(api_key="AIzaSyC7iGgDgvMNTAQ8kOnt_qxz-1YBTwWJ5No")
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 # This is the brain of our robot. We'll tell it how to act.
 model = genai.GenerativeModel('gemini-1.5-flash-latest')

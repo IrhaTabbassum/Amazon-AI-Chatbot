@@ -1,32 +1,30 @@
-/* General Body Styles */
+/* General Styling */
 body {
     font-family: 'Poppins', sans-serif;
-    margin: 0;
-    padding: 0;
+    background: linear-gradient(135deg, #2A005D, #4F0080, #8A2BE2); 
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #2A005D, #4F0080, #8A2BE2); /* Deep Purple to Violet gradient */
-    color: #E0E0E0; /* Light text for contrast */
-    overflow: hidden; /* Hide scrollbars if content doesn't fit exactly */
+    min-height: 100vh; /* Ensure body takes full viewport height */
+    margin: 0;
+    padding: 0;
+    color: #E0E0E0;
+    overflow: hidden; /* Prevent body scrolling; we'll scroll the chatbox */
 }
 
-/* Main Container for the Chatbot */
 .container {
-    background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white for a frosted glass effect */
+    background-color: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     width: 90%;
     max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Ensures rounded corners are respected */
-    position: relative; /* For the subtle background animation */
-    padding: 20px; /* Add padding inside the container */
+    height: 85vh; /* Make the container take up most of the viewport height */
+    display: flex; /* Enable Flexbox */
+    flex-direction: column; /* Stack children (header, chatbox, input area) vertically */
+    overflow: hidden; /* Hide anything that overflows the container */
+    padding: 20px; /* Padding inside the container */
+    box-sizing: border-box; /* Include padding in element's total width and height */
 }
-
-/* Subtle Background Animation (Tech Feel) */
 .container::before {
     content: '';
     position: absolute;
@@ -46,46 +44,47 @@ body {
     100% { transform: scale(1.05); opacity: 0.6; }
 }
 
-/* Header Styles */
-h1 {
+
+
+header h1 {
     text-align: center;
     color: #FFD700; /* Gold-like color for emphasis */
     margin-bottom: 5px;
-    font-size: 2.2em; /* Slightly larger title */
+    font-size: 2em; /* Slightly larger title */
     font-weight: 600; /* More prominent */
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.4); /* Soft glow */
 }
 
-.tagline {
+header p {
     text-align: center;
     color: #FF69B4; /* Pink */
     font-size: 1.1em;
     margin-top: 0;
     margin-bottom: 20px;
+    font-style: italic;
 }
 
-/* Chatbox for Messages */
 .chat-box {
-    background-color: rgba(255, 255, 255, 0.08); /* More subtle background */
+    flex-grow: 1; /* This makes the chat-box take all available vertical space */
+    overflow-y: auto; /* Enable vertical scrolling for messages */
+    padding: 15px; /* Padding inside the chat box */
     border-radius: 15px;
-    padding: 15px;
-    height: 450px; /* Make it a bit taller */
-    overflow-y: auto; /* Scroll only if needed */
-    margin-bottom: 15px;
+    background-color: rgba(255, 255, 255, 0.08); /* More subtle background */
+    margin-bottom: 15px; /* Space before the input area */
     box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2); /* Inner shadow for depth */
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Space between messages */
+    display: flex; /* Use flexbox for message alignment */
+    flex-direction: column; /* Stack messages vertically */
+    gap: 10px; /* Space between message bubbles */
+    height: 450px; /* Make it a bit taller */
 }
 
-/* Individual Message Styles */
 .message {
     padding: 10px 15px;
     border-radius: 12px;
-    max-width: 75%;
-    word-wrap: break-word; /* Prevents long words from breaking layout */
+    max-width: 75%; /* Limit message bubble width */
+    word-wrap: break-word; /* Ensure long words wrap */
     line-height: 1.5;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for bubbles */
     position: relative; /* For the subtle tech pattern */
 }
 
@@ -105,17 +104,17 @@ h1 {
 
 
 .user-msg {
-    background: linear-gradient(45deg, #6A5ACD, #483D8B); /* Slate Blue to Dark Slate Blue */
+     background: linear-gradient(45deg, #6A5ACD, #483D8B); /* Slate Blue to Dark Slate Blue */
     align-self: flex-end; /* Align to the right */
     color: #E0E0E0;
+
 }
 
 .bot-msg {
-    background: linear-gradient(45deg, #00BFFF, #1E90FF); /* Deep Sky Blue to Dodger Blue */
+     background: linear-gradient(45deg, #099fd1, #1E90FF); /* Deep Sky Blue to Dodger Blue */
     align-self: flex-start; /* Align to the left */
     color: #E0E0E0;
 }
-
 
 /* Styling for Gemini's formatted text within message bubbles */
 .bot-msg p {
@@ -161,27 +160,43 @@ h1 {
     box-sizing: border-box; /* Include padding/border in element's total width/height */
 }
 
-/* Input Form and Elements */
-.input-area {
-    display: flex;
-    gap: 10px; /* Space between input and button */
+
+/* Loading indicator style (added for AJAX) */
+.loading-indicator {
+    text-align: center;
+    font-size: 2em;
+    color: #FFD700; /* Gold color */
+    margin-top: 15px;
+    display: none; /* Hidden by default, shown by JS */
+    animation: pulseFade 1.5s infinite alternate; /* Simple pulse animation */
 }
 
-input[type="text"],
-textarea { /* Apply styles to both input type text and textarea */
-    flex-grow: 1;
+@keyframes pulseFade {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.05); }
+}
+
+
+.input-area {
+    display: flex; /* Flexbox for horizontal arrangement */
+    align-items: flex-end; /* Align items to the bottom if textarea grows */
+    gap: 10px; /* Space between input elements */
+}
+
+textarea[name="user_input"] {
+    flex-grow: 1; /* Textarea takes available space */
     padding: 12px 18px;
     border: none;
-    border-radius: 25px;
+    border-radius: 25px; /* Rounded corners */
     background-color: rgba(255, 255, 255, 0.15);
     color: #E0E0E0;
     font-size: 1em;
-    outline: none;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    resize: none; /* Prevent manual resizing by user */
-    overflow-y: hidden; /* Hide scrollbar but allow content to expand */
-    min-height: 50px; /* Set a minimum height for the textarea */
+    resize: none; /* Disable manual resizing by user */
+    min-height: 50px; /* Minimum height for one line */
+    max-height: 120px; /* Limit max height before internal scrollbar appears */
+    overflow-y: hidden; /* Enable scrolling for textarea if content exceeds max-height */
 }
 
 input[type="text"]::placeholder,
@@ -224,7 +239,42 @@ input[type="submit"]:hover {
     box-shadow: 0 8px 20px rgba(255, 99, 71, 0.6); /* More prominent shadow on hover */
 }
 
-#clearChatBtn {
+.button-group {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+}
+
+button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 25px; /* Rounded buttons */
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button.send-btn {
+    
+    padding: 12px 25px;
+    background: linear-gradient(45deg, #ff6347, #e5533d); 
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 5px 15px #b03f2b;
+}
+
+button.send-btn:hover {
+    
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px #e5533d;
+}
+
+button.clear-btn {
     padding: 12px 25px;
     background: linear-gradient(45deg, #FF69B4, #E0BBE4); /* Pink to light purple gradient */
     color: white;
@@ -235,54 +285,33 @@ input[type="submit"]:hover {
     font-weight: 600;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
-    margin-left: 10px; /* Space it from the Send button */
+
 }
 
-#clearChatBtn:hover {
+button.clear-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 105, 180, 0.6);
 }
 
-/* Scrollbar Styling (for Chrome/Edge/Safari) */
-.chat-box::-webkit-scrollbar {
+/* Scrollbar styling (optional, but good for aesthetics) */
+.chat-box::-webkit-scrollbar,
+textarea::-webkit-scrollbar {
     width: 8px;
 }
-.chat-box::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+
+.chat-box::-webkit-scrollbar-track,
+textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
     border-radius: 10px;
 }
-.chat-box::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #8A2BE2, #FF69B4); /* Purple to Pink gradient */
+
+.chat-box::-webkit-scrollbar-thumb,
+textarea::-webkit-scrollbar-thumb {
+    background: #888;
     border-radius: 10px;
 }
-.chat-box::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #9932CC, #FF1493);
-}
 
-.loading-indicator {
-    text-align: center;
-    font-size: 2em;
-    color: #FFD700; /* Gold color */
-    margin-top: 15px;
-    display: none; /* Hidden by default, shown by JS */
-    animation: pulseFade 1.5s infinite alternate; /* Simple pulse animation */
-}
-
-@keyframes pulseFade {
-    0% { opacity: 0.5; transform: scale(1); }
-    100% { opacity: 1; transform: scale(1.05); }
-}
-
-/* Responsive Design for smaller screens */
-@media (max-width: 768px) {
-    .container {
-        width: 95%;
-        margin: 10px;
-    }
-    h1 {
-        font-size: 1.8em;
-    }
-    .tagline {
-        font-size: 1em;
-    }
+.chat-box::-webkit-scrollbar-thumb:hover,
+textarea::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }

@@ -2,7 +2,7 @@
 
 print("DEBUG: Starting web_app_new.py script...") # Keep this for debugging
 
-from flask import Flask, render_template_string, request, url_for
+from flask import Flask, render_template_string, request, url_for, jsonify
 import google.generativeai as genai
 import os
 import markdown2 # Add this new import!
@@ -35,77 +35,140 @@ chat_history = []
 # Add the HTML_TEMPLATE block here:
 HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amazon AI Chatbot</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Favicon.png') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
 </head>
 <body>
     <div class="container">
-        <h1>Your Personal Amazon Assistant</h1>
-        <p class="tagline">Your intelligent partner for Amazon selling success.</p>
+        <header>
+            <h1>Your Personal Amazon Assistant</h1>
+            <p>Your intelligent partner for Amazon selling success.</p>
+        </header>
         <div class="chat-box" id="chatBox">
-            <div class="chat-box" id="chatBox">
-            <div id="loadingIndicator" class="loading-indicator">...</div> 
-            {% for message in chat_history %}
-                {% if message.role == 'user' %}
-                    <p class="message user-msg"><b>You:</b> {{ message.text }}</p>
-                {% else %}
-                    <p class="message bot-msg"><b>Assistant:</b> {{ message.text | safe }}</p>
-                {% endif %}
-            {% endfor %}
-        </div>
-        <form method="POST" action="/" class="input-area" onsubmit="showLoading();">
-            <textarea name="user_input" placeholder="Ask me anything about Amazon selling..." autocomplete="off" autofocus rows="1"></textarea> ```
-            <input type="submit" value="Send">
-            <button type="button" id="clearChatBtn">Clear Chat</button> 
+            <p class="message bot-msg"><b>Assistant:</b> Hello! I'm your Amazon AI Assistant. How can I help you with your Amazon selling journey today?</p>
+            </div>
+        <div id="loadingIndicator" style="display: none;">...</div> <form id="chatForm" class="input-area"> <textarea name="user_input" placeholder="Ask me anything about Amazon selling..." rows="1" required></textarea>
+            <div class="button-group">
+                <button type="submit" class="send-btn">Send</button>
+                <button type="button" id="clearChatBtn" class="clear-btn">Clear Chat</button>
+            </div>
         </form>
     </div>
 
-   <script>
-        var chatBox = document.getElementById("chatBox");
-        var loadingIndicator = document.getElementById("loadingIndicator");
-        chatBox.scrollTop = chatBox.scrollHeight;
+    <script>
+        const chatBox = document.getElementById("chatBox");
+        const loadingIndicator = document.getElementById("loadingIndicator");
+        const userInput = document.querySelector('textarea[name="user_input"]');
+        const chatForm = document.getElementById("chatForm");
+        const clearChatBtn = document.getElementById("clearChatBtn");
 
-        var chatBox = document.getElementById("chatBox");
-        var loadingIndicator = document.getElementById("loadingIndicator");
-        var userInput = document.querySelector('textarea[name="user_input"]'); // Get the textarea
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        // Dynamic Textarea Resizing
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto'; // Reset height to recalculate
-            this.style.height = (this.scrollHeight) + 'px'; // Set height based on scrollHeight
-            chatBox.scrollTop = chatBox.scrollHeight; // Keep chat scrolled to bottom
-        });
+        // Function to scroll to the bottom of the chat box smoothly
+        function scrollToBottom() {
+            chatBox.scrollTo({
+                top: chatBox.scrollHeight,
+                behavior: 'smooth' // Smooth scrolling!
+            });
+        }
 
         // Function to show the loading indicator
         function showLoading() {
-            loadingIndicator.style.display = 'block'; // Show the indicator
-            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom to show it
+            loadingIndicator.style.display = 'block';
+            scrollToBottom();
         }
 
         // Function to hide the loading indicator
         function hideLoading() {
-            loadingIndicator.style.display = 'none'; // Hide the indicator
+            loadingIndicator.style.display = 'none';
         }
 
-        // Initially hide the loading indicator when the page loads
+        // Initially hide the loading indicator and scroll to bottom on page load
         document.addEventListener('DOMContentLoaded', hideLoading);
+        document.addEventListener('DOMContentLoaded', scrollToBottom);
 
-        // Clear Chat Functionality (existing code)
-        document.getElementById("clearChatBtn").addEventListener("click", function() {
+        // Dynamic Textarea Resizing
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            scrollToBottom(); // Keep chat scrolled to bottom as user types
+        });
+
+        // Handle form submission via AJAX
+        chatForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // IMPORTANT: Prevent the default form submission (page reload)
+
+            const userMessage = userInput.value.trim();
+            if (userMessage === "") return; // Don't send empty messages
+
+            // 1. Add user message to chat box immediately
+            const userMsgElement = document.createElement('p');
+            userMsgElement.className = 'message user-msg';
+            userMsgElement.innerHTML = `<b>You:</b> ${userMessage}`;
+            chatBox.appendChild(userMsgElement);
+            scrollToBottom();
+
+            userInput.value = ''; // Clear input field
+            userInput.style.height = 'auto'; // Reset textarea height after clearing
+            showLoading(); // Show loading indicator
+
+            try {
+                // 2. Send message to Flask backend using fetch (AJAX)
+                const response = await fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_input: userMessage })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json(); // Get the JSON response from Flask
+
+                // 3. Add bot response to chat box
+                const botMsgElement = document.createElement('p');
+                botMsgElement.className = 'message bot-msg';
+                // Flask will send pre-formatted HTML (thanks to markdown2), so use innerHTML
+                botMsgElement.innerHTML = `<b>Assistant:</b> ${data.bot_response}`;
+                chatBox.appendChild(botMsgElement);
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                // Display a user-friendly error message in the chatbox if something goes wrong
+                const errorMsgElement = document.createElement('p');
+                errorMsgElement.className = 'message bot-msg';
+                errorMsgElement.innerHTML = `<b>Assistant:</b> Oh dear, something went wrong! Please try again. (Error: ${error.message})`;
+                chatBox.appendChild(errorMsgElement);
+            } finally {
+                // 4. Always hide loading indicator and scroll to bottom
+                hideLoading();
+                scrollToBottom();
+            }
+        });
+
+        // Clear Chat Functionality (updated for AJAX)
+        clearChatBtn.addEventListener("click", function() {
             if (confirm("Are you sure you want to clear the chat history?")) {
-                chatBox.innerHTML = '';
+                chatBox.innerHTML = ''; // Clear messages from the display
+                // Send a request to the server to clear the actual chat_history
                 fetch('/clear_history', { method: 'POST' })
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data.status);
+                        console.log(data.status); // Log status from server
+                        // Optionally add a "Chat history cleared" message to chatBox if needed
+                        const clearedMsgElement = document.createElement('p');
+                        clearedMsgElement.className = 'message bot-msg';
+                        clearedMsgElement.innerHTML = '<b>Assistant:</b> Chat history cleared!';
+                        chatBox.appendChild(clearedMsgElement);
+                        scrollToBottom();
                     })
-                    .catch(error => console.error('Error clearing history:', error)
-                );
+                    .catch(error => console.error('Error clearing history:', error));
             }
         });
     </script>
@@ -117,53 +180,74 @@ HTML_TEMPLATE = """
 
 # ... (HTML_TEMPLATE block ends here) ...
 
-# This tells our web server what to do when someone visits the main page "/"
-@app.route('/', methods=['GET', 'POST'])
-def chatbot():
-    global chat_history # We need to tell Python we're using the global chat_history list
-    # Initialize response here so it always exists
-    response_text_to_display = "" # This will hold the text we want to show as bot response
-
-    if request.method == 'POST':
-        user_message = request.form['user_input']
-        if user_message.lower() == 'exit':
-            # For a web app, 'exit' usually means closing the browser tab,
-            # or we could make it clear the history. For now, it just won't do anything special.
-            pass
-        else:
-            try:
-                # Add user message to history
-                chat_history.append({'role': 'user', 'text': user_message})
-
-                # Start a new chat session with the updated history for each request
-                # This is a simple way to maintain conversation in a basic web app
-                # For more complex apps, we'd use session IDs or databases.
-                chat_session = model.start_chat(history=[
-                    {'role': 'user', 'parts': [msg['text']]} if msg['role'] == 'user' else {'role': 'model', 'parts': [msg['text']]}
-                    for msg in chat_history
-                ])
-
-                gemini_response = chat_session.send_message(user_message) # Renamed to gemini_response
-                # Convert Gemini's response text to HTML for better formatting
-                response_text_to_display = markdown2.markdown(gemini_response.text, extras=["fenced-code-blocks", "tables", "footnotes"])
-
-                # Add bot response (now in HTML) to history
-                chat_history.append({'role': 'model', 'text': response_text_to_display})
-
-            except Exception as e:
-                # If an error occurs, the error message is what we want to display
-                response_text_to_display = f"Oh dear, something went wrong! Error: {e}. Please try again or check your internet connection."
-                chat_history.append({'role': 'model', 'text': response_text_to_display})
-
-    # Render the HTML template, passing the chat history to display messages
+# Route for the main chat page (GET request to load the page)
+@app.route('/', methods=['GET'])
+def index():
+    global chat_history # Ensure we're using the global variable
+    # Initial chat history can be reset or loaded from a session here if needed.
+    # For simplicity, we'll let the initial welcome message come from HTML and keep chat_history for subsequent turns.
     return render_template_string(HTML_TEMPLATE, chat_history=chat_history)
 
-# New route to clear chat history
+# New route for handling AJAX messages (POST request)
+# New route for handling AJAX messages (POST request)
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    global chat_history # We need to tell Python we're using the global chat_history list
+
+    try:
+        # Get user input from the JSON request sent by JavaScript
+        data = request.get_json()
+        user_message = data['user_input']
+
+        # Add user message to history (for server-side tracking, though UI handles display)
+        # Ensure proper format for Gemini API: {'role': 'user', 'parts': ['text']}
+        chat_history.append({'role': 'user', 'parts': [user_message]})
+
+        # Start a new chat session with the updated history for each request
+        # This ensures Gemini has context from previous turns
+        # Convert history to the format expected by model.start_chat()
+        formatted_history_for_gemini = []
+        for msg in chat_history:
+            if msg['role'] == 'user':
+                formatted_history_for_gemini.append({'role': 'user', 'parts': [msg['parts'][0]]})
+            elif msg['role'] == 'model':
+                
+                if msg['role'] == 'user':
+                    formatted_history_for_gemini.append({'role': 'user', 'parts': [msg['text']]})
+                elif msg['role'] == 'model':
+                    # Convert previously stored plain text bot response to Content object for Gemini
+                    formatted_history_for_gemini.append({'role': 'model', 'parts': [msg['text']]})
+
+        chat_session = model.start_chat(history=formatted_history_for_gemini)
+
+        # Get Gemini's response
+        gemini_response_object = chat_session.send_message(user_message)
+        gemini_response_text = gemini_response_object.text # Get the plain text response
+
+        # Convert Gemini's plain text response to HTML for better formatting in the UI
+        formatted_response_html = markdown2.markdown(gemini_response_text, extras=["fenced-code-blocks", "tables", "footnotes"])
+
+        # Add bot's *plain text* response to server-side chat_history
+        chat_history.append({'role': 'model', 'text': gemini_response_text}) # Store plain text for history context
+
+        # Return the formatted HTML bot response as JSON to the JavaScript
+        return jsonify({'bot_response': formatted_response_html})
+
+    except Exception as e:
+        # Handle potential errors during processing
+        error_message = f"Oh dear, something went wrong! Error: {e}. Please try again."
+        print(f"Error in send_message: {e}") # Log error for debugging
+        # Return the error message as JSON to the JavaScript, with a 500 status code
+        return jsonify({'bot_response': error_message}), 500
+    
+# Route to clear chat history
 @app.route('/clear_history', methods=['POST'])
 def clear_history():
     global chat_history
-    chat_history = [] # Reset the global chat history
-    return {'status': 'Chat history cleared'} # Send a success message back to JavaScript
+    chat_history = []
+    # Return a JSON response for the AJAX call
+    return jsonify({'status': 'Chat history cleared'})
+
 
 # This makes our web server actually start running!
 if __name__ == '__main__':
