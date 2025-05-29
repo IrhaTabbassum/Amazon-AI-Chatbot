@@ -41,7 +41,7 @@ HTML_TEMPLATE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amazon AI Chatbot</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="icon" href="/static/favicon.png" type="image/png">
+    <link rel="icon" href="/static/Favicon.png" type="image/png">
 </head>
 <body>
     <div class="container">
