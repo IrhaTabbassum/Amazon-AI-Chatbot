@@ -7,9 +7,11 @@ import google.generativeai as genai
 import os
 import markdown2 # Add this new import!
 
-# Important: Put your Gemini API key here again!
-# Make sure it's inside the quotation marks "".
-genai.configure(api_key="AIzaSyC7iGgDgvMNTAQ8kOnt_qxz-1YBTwWJ5No")
+# Get the API key from an environment variable
+api_key = os.getenv("GEMINI_API_KEY")
+if api_key is None:
+    raise ValueError("GEMINI_API_KEY environment variable not set.")
+genai.configure(api_key=api_key)
 
 # Choose our robot's brain model (the one that worked for you!)
 # Define a system instruction to restrict the bot's scope
@@ -209,14 +211,9 @@ def send_message():
         formatted_history_for_gemini = []
         for msg in chat_history:
             if msg['role'] == 'user':
-                formatted_history_for_gemini.append({'role': 'user', 'parts': [msg['parts'][0]]})
+                formatted_history_for_gemini.append({'role': 'user', 'parts': [{'text': msg['parts'][0]}]})
             elif msg['role'] == 'model':
-                
-                if msg['role'] == 'user':
-                    formatted_history_for_gemini.append({'role': 'user', 'parts': [msg['text']]})
-                elif msg['role'] == 'model':
-                    # Convert previously stored plain text bot response to Content object for Gemini
-                    formatted_history_for_gemini.append({'role': 'model', 'parts': [msg['text']]})
+                formatted_history_for_gemini.append({'role': 'model', 'parts': [{'text': msg['text']}]})
 
         chat_session = model.start_chat(history=formatted_history_for_gemini)
 

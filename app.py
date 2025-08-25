@@ -1,11 +1,11 @@
 import google.generativeai as genai
 import os
 
-
-# This is where you'll put your secret Gemini key!
-# It's like telling our robot its secret password.
-# Replace 'YOUR_GEMINI_API_KEY' with the key you saved earlier.
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+# Get the API key from an environment variable
+api_key = os.getenv("GEMINI_API_KEY")
+if api_key is None:
+    raise ValueError("GEMINI_API_KEY environment variable not set.")
+genai.configure(api_key=api_key)
 
 # This is the brain of our robot. We'll tell it how to act.
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
